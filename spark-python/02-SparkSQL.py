@@ -17,10 +17,16 @@ rowRDD = dataRDD.map(lambda line: line.split(",")).map(lambda x: Row(cid=x[0],ui
 clusters = sqlContext.createDataFrame(rowRDD)
 clusters.registerTempTable("clusters")
 
-clusters_filtered = sqlContext.sql("SELECT cid, count(uid) FROM clusters group by cid order by count(uid) desc")
+clusters_filtered = sqlContext.sql("SELECT cid, count(uid) as uid_count FROM clusters group by cid having uid_count > 4 order by uid_count desc")
 clusters_filtered.show(100)
 
 print clusters_filtered
 print "==========finished clusters_filtered.show()=============="
+
+
+# Output
+clusters_out = clusters_filtered.rdd.map(lambda x: "cid: {}, uid_count {}".format(x.cid, x.uid_count))
+for c_out in clusters_out.collect():
+  print c_out
 
 sc.stop()
