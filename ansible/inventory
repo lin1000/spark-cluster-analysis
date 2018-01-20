@@ -1,0 +1,8 @@
+[prod_server]
+poc-cent7-ap1 ansible_port=22 ansible_user=spark
+poc-cent7-ap2 ansible_port=22 ansible_user=spark
+poc-cent7-ap3 ansible_port=22 ansible_user=spark
+poc-cent7-ap4 ansible_port=22 ansible_user=spark
+
+[local]
+poc-cent7-ap1 ansible_port=22 ansible_user=spark

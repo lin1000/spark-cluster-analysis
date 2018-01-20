@@ -1,0 +1,82 @@
+---
+- name: install iperf3
+  become: yes
+  yum:
+    name: iperf3
+    state: present
+  tags:
+    - iperf
+
+- name: setup iperf systemd target
+  become: yes
+  template:
+    src: "iperf.service.j2"
+    dest: "/usr/lib/systemd/system/iperf.service"
+    force: yes
+  tags:
+    - iperf
+
+- name: reload systemd configuration
+  become: yes
+  command: systemctl daemon-reload
+  tags:
+    - iperf
+
+- name: start iperf service
+  become: yes
+  service:
+    name: iperf
+    state: restarted
+    enabled: true
+  tags:
+    - iperf
+
+- name: Create target directory
+  file: "path={{iperf_deploy_path}}/ state=directory mode=0755"
+
+- name: deploy iperf check script
+  template:
+    src: "iperf_check.sh.j2"
+    dest: "{{iperf_deploy_path}}/iperf_check.sh"
+    mode: "u=rwx,g=rx,o=rx"
+    force: yes
+  tags:
+    - iperf
+
+- name: Clean previous iperf check result file
+  file: "path={{iperf_output_file}} state=absent"
+
+- name: run iperf
+  command: "{{iperf_deploy_path}}/iperf_check.sh"
+  tags:
+    - iperf
+
+- name: Check iperf check result file exist
+  stat:
+    path: "{{iperf_output_file}}"
+  register: iperf_stat_result
+
+- name: Warning if the result is not exist
+  debug:
+    msg: "{{iperf_output_file}} does not exist, no iperf result generated"
+  when: iperf_stat_result.stat.exists == False
+  
+# Storing in a path relative to the playbook
+- name: Fetching file from remote
+  fetch:
+    src: "{{iperf_output_file}}"
+    dest: logs/{{ inventory_hostname }}-iperf.csv
+    flat: yes
+  when: iperf_stat_result.stat.exists == True
+
+# - name: setup cron job for iperf checks
+#   sudo: yes
+#   cron:
+#     name: "iperf_check"
+#     minute: "*/{{ iperf_runs_interval }}"
+#     cron_file: iperf_check
+#     user: root
+#     job: "sleep $((60 * (RANDOM % 3))); /opt/iperf_check.sh"
+#     state: present
+#   tags:
+#     - iperf

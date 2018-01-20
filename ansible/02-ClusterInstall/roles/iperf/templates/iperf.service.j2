@@ -1,0 +1,9 @@
+[Unit]
+Description=iperf - network measurement tool
+After=network.target
+
+[Service]
+ExecStart=/bin/iperf3 -s
+
+[Install]
+WantedBy=multi-user.target

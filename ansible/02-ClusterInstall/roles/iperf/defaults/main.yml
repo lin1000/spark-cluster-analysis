@@ -1,0 +1,5 @@
+---
+iperf_output_file: "~/ansible_deploy/iperf/iperf.csv"
+iperf_deploy_path: "~/ansible_deploy/iperf"
+node_name_pattern: "poc-cent7-ap"
+iperf_transfer_bytes: "1G"

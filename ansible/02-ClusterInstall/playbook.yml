@@ -1,0 +1,34 @@
+---
+- hosts: prod_server
+  serial : 1
+  roles:
+    - { role: pip, become: yes }
+    - { role: iperf}
+  tags:
+    - prod   
+   
+- hosts: local
+  serial : 1
+  roles:
+    - { role: pip, become: yes }
+    - { role: iperf}
+  tags:
+    - dev
+
+- hosts: local
+  tasks: 
+    - name: cat iperf result of prod server
+      shell: "cat {{ playbook_dir }}/logs/{{ item }}-iperf.csv"
+      register: iperf_ret
+      with_items: "{{ groups['all']}}"
+    - debug: 
+        msg:  "{% set output = [] %}\
+        {% for x in (iperf_ret.results ) %}\
+          {% for line in (x.stdout_lines) %}\
+            {{ output.append( line ) }}\
+          {% endfor %}\
+        {% endfor %}\
+        {{output}}"
+  tags:
+    - iperf_result
+    - prod
