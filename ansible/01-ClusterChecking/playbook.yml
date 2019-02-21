@@ -1,5 +1,5 @@
 ---
-- hosts: server
+- hosts: prod_server
   tasks:
     # task 1
     - name: test connection

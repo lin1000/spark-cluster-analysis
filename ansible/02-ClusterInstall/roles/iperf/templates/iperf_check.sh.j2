@@ -5,3 +5,5 @@ do
     echo "send from [$HOSTNAME] to [$node]" >> {{ iperf_output_file }}
     iperf3 -c $node -n {{ iperf_transfer_bytes }} | grep "sender"  >> {{ iperf_output_file }}
 done
+
+exit 0
